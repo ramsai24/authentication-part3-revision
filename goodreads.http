@@ -1,5 +1,9 @@
 GET http://localhost:3000/books/
-Authorization: Bearer JWT_TOKEN
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJhaHVsMTIzIiwiaWF0IjoxNjgzNjE0MDk5fQ.SfUoliyUAkf18Pr65oh3Q8gq7mBLXf2-bIiBmMEGq7A
+
+###
+GET http://localhost:3000/profile/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJhaHVsMTIzIiwiaWF0IjoxNjgzNjE0MDk5fQ.SfUoliyUAkf18Pr65oh3Q8gq7mBLXf2-bIiBmMEGq7A
 
 ###
 

@@ -25,8 +25,14 @@ const initializeDBAndServer = async () => {
 };
 initializeDBAndServer();
 
-//Get Books API
-app.get("/books/", (request, response) => {
+// const logger = (request, response, next) => {
+//   console.log(request.query);
+//   next();
+// };
+
+//app.get("/books/", logger, (request, response) => {
+
+const authenticateToken = (request, response, next) => {
   let jwtToken;
   const authHeader = request.headers["authorization"];
   if (authHeader !== undefined) {
@@ -40,35 +46,69 @@ app.get("/books/", (request, response) => {
       if (error) {
         response.send("Invalid Access Token");
       } else {
-        const getBooksQuery = `
+        console.log(payload);
+        request.username = payload.username;
+        next();
+      }
+    });
+  }
+};
+
+//Get Profile API
+app.get("/profile/", authenticateToken, async (request, response) => {
+  const { username } = request;
+  console.log(username);
+
+  const selectUserQuery = `SELECT * FROM user WHERE username ="${username}";`;
+  const dbUser = await db.get(selectUserQuery);
+  response.send(dbUser);
+});
+
+//Get Books API
+
+app.get("/books/", authenticateToken, async (request, response) => {
+  console.log("Inside Get Books API");
+  const getBooksQuery = `
             SELECT
               *
             FROM
              book
             ORDER BY
              book_id;`;
-        const booksArray = await db.all(getBooksQuery);
-        response.send(booksArray);
+  const booksArray = await db.all(getBooksQuery);
+  response.send(booksArray);
+});
+
+//Get Book API
+app.get("/books/:bookId/", async (request, response) => {
+  let jwtToken;
+  const authHeader = request.headers["authorization"];
+  if (authHeader !== undefined) {
+    jwtToken = authHeader.split(" ")[1];
+  }
+  if (jwtToken === undefined) {
+    response.status(401);
+    response.send("Invalid Access Token");
+  } else {
+    jwt.verify(jwtToken, "MY_SECRET_TOKEN", async (error, payload) => {
+      if (error) {
+        response.send("Invalid Access Token");
+      } else {
+        const { bookId } = request.params;
+        const getBookQuery = `
+            SELECT
+            *
+            FROM
+            book 
+            WHERE
+            book_id = ${bookId};
+            `;
+        const book = await db.get(getBookQuery);
+        response.send(book);
       }
     });
   }
 });
-
-//Get Book API
-app.get("/books/:bookId/", async(request, response) => {
-    const { bookId } = request.params;
-    const getBookQuery = `
-      SELECT
-       *
-      FROM
-       book 
-      WHERE
-       book_id = ${bookId};
-    `;
-    const book = await db.get(getBookQuery);
-    response.send(book);
-});
-
 
 //User Register API
 app.post("/users/", async (request, response) => {
